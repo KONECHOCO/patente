@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">Patente Facile</string>
+    <string name="title_activity_main">Patente Facile</string>
+    <string name="package_name">com.ikonet.patente</string>
+    <string name="custom_url_scheme">com.ikonet.patente</string>
+</resources>

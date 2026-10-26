@@ -188,21 +188,24 @@ class SoundEngine {
 export const sound = new SoundEngine();
 
 // Text to Speech Helper for Multilingual Audio Reader
-export function speakText(text, lang = 'it') {
-  if (!('speechSynthesis' in window)) return;
+export function speakText(text, lang = 'it', rate = 1, onEnd = null) {
+  if (!('speechSynthesis' in window)) { if (onEnd) onEnd(); return; }
   window.speechSynthesis.cancel(); // stop any current speech
   const utterance = new SpeechSynthesisUtterance(text);
-  
+
   const langMap = {
     it: 'it-IT',
     fr: 'fr-FR',
-    en: 'en-US',
+    en: 'en-GB',
     es: 'es-ES',
     de: 'de-DE'
   };
   utterance.lang = langMap[lang] || 'it-IT';
-  utterance.rate = 1.0;
+  const voice = window.speechSynthesis.getVoices().find(v => v.lang === utterance.lang) || window.speechSynthesis.getVoices().find(v => v.lang.startsWith(lang));
+  if (voice) utterance.voice = voice;
+  utterance.rate = rate;
   utterance.pitch = 1.0;
+  if (onEnd) { utterance.onend = onEnd; utterance.onerror = onEnd; }
   window.speechSynthesis.speak(utterance);
 }
 
