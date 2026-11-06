@@ -61,8 +61,9 @@ workflows:
     max_build_duration: 45
     instance_type: linux_x2
     environment:
-      android_signing:
-        - patente_android
+      # Keystore and passwords are secure variables of the app on Codemagic (group patente_signing).
+      groups:
+        - patente_signing
       vars:
         PACKAGE_NAME: "com.ikonet.patente"
       node: 22
@@ -76,6 +77,10 @@ workflows:
           npx cap sync android
       - name: Set Android SDK location
         script: echo "sdk.dir=$ANDROID_SDK_ROOT" > "$CM_BUILD_DIR/android/local.properties"
+      - name: Decode upload keystore
+        script: |
+          echo "$CM_KEYSTORE" | base64 --decode > "$CM_BUILD_DIR/android/app/upload.jks"
+          echo "CM_KEYSTORE_PATH=$CM_BUILD_DIR/android/app/upload.jks" >> "$CM_ENV"
       - name: Build release AAB
         script: |
           cd android
