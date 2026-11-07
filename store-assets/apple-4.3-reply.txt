@@ -1,0 +1,21 @@
+Hello, thank you for the review. Answers to your questions:
+
+1. Patente Facile prepares learner drivers for the theory test and the road test of the country where they study, in one app: lessons that follow each country's official syllabus (the 25 chapters of the Italian ministerial programme, the 10 French ETG themes, DGT, German Grundstoff/Zusatzstoff, UK DVSA topics, Ivorian code), 130+ road signs drawn with each country's official sign code, mock exams that apply each country's real pass rules (Italy 30 true/false with max 3 errors, France 40 MCQ with 35 to pass, Germany weighted error points, UK 50 questions/43 to pass), and an interactive junction trainer whose right-of-way solver computes the correct order for 60 scenarios. Pro adds a 3D driving simulator with a virtual examiner that detects faults (red light, STOP not respected, failure to give way, pedestrians, indicators, mirrors, seat belt, speeding, wrong side), plus a lesson/exam planner with local reminders.
+
+2. Learner drivers aged 14+ preparing licence AM/A/B, and especially people who move between countries (students, workers, immigrants) who must take the test in a country whose language or rules they do not know well: the app shows that country's rules in its language or in English and can switch country at any time.
+
+3. Existing apps cover one country and one exam format. Patente Facile handles six countries with their real, different exam formats in one place, explains the differences (e.g. right-hand vs left-hand traffic, km/h vs mph, alcohol limits, points systems), and adds practice that question-bank apps do not have: a junction solver that explains every right-of-way decision and a simulator that evaluates the driving test manoeuvres instead of only theory. The free version is complete for study; Pro is a one-time purchase without subscription.
+
+4. So far testing was internal: the developer tested every screen at phone and tablet sizes in all five interface languages and all six countries, with automated checks on all 800+ questions (answer keys, translations, sign references) and on the simulator's examiner rules. That internal review led to: balancing true and false statements as in the real Italian exam, adding Spanish and German exam tips, enlarging the simulator view on phones and fixing the parking scenario. We did not run an external beta before the first submission; a TestFlight build has now been submitted for external testing with learner drivers, and we will apply their feedback before resubmitting.
+
+5. It is a standalone product. Other apps on the account are unrelated (fuel prices, public transport, translator, home pantry, workout planner, SQL guides, a trivia game); none teaches driving or road rules.
+
+6. No. None of our other apps is about driving licences or road safety, so this functionality cannot be an in-app purchase or content addition of any of them.
+
+7. The only shared component is a small in-house wrapper (about 300 lines) around Google AdMob and StoreKit/Play Billing used for ads, consent (UMP + App Tracking Transparency) and the one-time Pro purchase. All content (lessons, questions, sign drawings, junction engine, simulator) was written specifically for this app.
+
+8. No. It does not use any template, app generator or third-party content library. Standard frameworks only: Capacitor, Google Mobile Ads SDK, StoreKit/Play Billing.
+
+9. No. The app was conceived, written and published by us (Ikonet Solutions, INZA KONE), who own its content and branding.
+
+The app is not affiliated with any government agency; this is stated in the store description and on the Home screen. Thank you.

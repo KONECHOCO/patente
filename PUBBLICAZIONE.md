@@ -26,12 +26,8 @@ Dopo l'approvazione: rilasciare a mano su App Store Connect, poi su AdMob **"Agg
 
 App "Patente Facile: Quiz e Guida", pacchetto `com.ikonet.patente`, id Console 4973164405457198048, gratuita, italiano.
 
-1. **Chiave di firma (la crei tu)**:
-   ```
-   "C:\Program Files\Android\Android Studio\jbr\bin\keytool.exe" -genkeypair -v -keystore C:\Users\rebic\Desktop\master\PATENTE_ANDROID_SIGNING\patente-upload.jks -alias patente -keyalg RSA -keysize 2048 -validity 10000
-   ```
-   Poi Codemagic → Team settings → Code signing identities → Android keystores → carica il file con nome di riferimento **patente_android** (stessa alias e password).
-2. Build `android-release` su Codemagic → AAB → primo caricamento manuale in **Test interno**.
+1. **Chiave di firma**: creata il 06/11/2026 in `C:\Users\rebic\Desktop\master\PATENTE_ANDROID_SIGNING` (`patente-upload.jks`, alias `patente`, password in `keystore-info.txt`). Su Codemagic è salvata come variabili protette del gruppo **patente_signing** (`CM_KEYSTORE`, `CM_KEYSTORE_PASSWORD`, `CM_KEY_ALIAS`, `CM_KEY_PASSWORD`). Non perderla: Google Play accetta aggiornamenti solo firmati con questa chiave di caricamento.
+2. Build `android-release` su Codemagic **fatta** (06/11/2026): AAB firmato in `PATENTE_ANDROID_SIGNING\patente-1.0.0.aab`. Manca il primo caricamento manuale in **Test interno**. Account personale: per la produzione servono test chiusi con 12 tester per 14 giorni.
 3. Prodotto in-app `patente_pro` a 2,99 € (Play lo permette solo dopo il primo AAB).
 4. Scheda dello store in 5 lingue (testi in `store-assets/listing.json`, campi `name`, `playShort`, `description`), icona e feature graphic in `store-assets/play/`, screenshot `*-android-1080x1920.png`.
 5. Questionari: classificazione dei contenuti, Data Safety (stesse categorie di App Privacy), pubblico di destinazione (13+), annunci: sì, accesso all'app: nessun login.
