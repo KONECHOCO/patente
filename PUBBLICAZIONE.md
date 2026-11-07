@@ -27,7 +27,9 @@ Dopo l'approvazione: rilasciare a mano su App Store Connect, poi su AdMob **"Agg
 App "Patente Facile: Quiz e Guida", pacchetto `com.ikonet.patente`, id Console 4973164405457198048, gratuita, italiano.
 
 1. **Chiave di firma**: creata il 06/11/2026 in `C:\Users\rebic\Desktop\master\PATENTE_ANDROID_SIGNING` (`patente-upload.jks`, alias `patente`, password in `keystore-info.txt`). Su Codemagic è salvata come variabili protette del gruppo **patente_signing** (`CM_KEYSTORE`, `CM_KEYSTORE_PASSWORD`, `CM_KEY_ALIAS`, `CM_KEY_PASSWORD`). Non perderla: Google Play accetta aggiornamenti solo firmati con questa chiave di caricamento.
-2. Build `android-release` su Codemagic **fatta** (06/11/2026): AAB firmato in `PATENTE_ANDROID_SIGNING\patente-1.0.0.aab`. Manca il primo caricamento manuale in **Test interno**. Account personale: per la produzione servono test chiusi con 12 tester per 14 giorni.
+2. AAB 1.0.0 (versionCode 2, 8,5 MB) caricato il 07/11/2026 nella release **bozza** del canale *Test chiusi - Alpha*. Tester come CineGuide: Alpha → gruppo Google `testers-community@googlegroups.com`; canale *tester4* → elenco email `tester4` (23 utenti, release ancora da creare con "Aggiungi dalla raccolta"). Account personale: per la produzione servono 12 tester per 14 giorni.
+   Fatti anche: norme sulla privacy, dettagli di accesso (nessuna restrizione), annunci (sì), scheda italiana (testi, icona, feature graphic, 7 screenshot).
+   Risposta ad Apple per 4.3 inviata il 07/11/2026.
 3. Prodotto in-app `patente_pro` a 2,99 € (Play lo permette solo dopo il primo AAB).
 4. Scheda dello store in 5 lingue (testi in `store-assets/listing.json`, campi `name`, `playShort`, `description`), icona e feature graphic in `store-assets/play/`, screenshot `*-android-1080x1920.png`.
 5. Questionari: classificazione dei contenuti, Data Safety (stesse categorie di App Privacy), pubblico di destinazione (13+), annunci: sì, accesso all'app: nessun login.
