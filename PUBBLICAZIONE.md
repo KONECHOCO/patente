@@ -32,6 +32,10 @@ App "Patente Facile: Quiz e Guida", pacchetto `com.ikonet.patente`, id Console 4
    Prodotto `patente_pro` attivo (opzione `patente-pro`, retrocompatibile, 2,99 € convertito in 174 paesi). Release 1.0.0 confermata in Alpha e tester4 (178 paesi ciascuno).
    **Inviate in revisione** il 07/11/2026 (24 modifiche, test chiuso). Dopo l'approvazione: 14 giorni con ≥12 tester, poi richiesta di accesso alla produzione.
    Risposta ad Apple per 4.3 inviata il 07/11/2026.
+   **Respinta da Google il 09/11/2026** per *Misleading Claims — Missing Source Link for Government Information*. Correzione nella 1.0.1: scheda "Fonti ufficiali" con link governativi (Home, Impostazioni, ogni capitolo, quiz ufficiali), dichiarazione di indipendenza, link nelle descrizioni dello store in 5 lingue (salvate in Console il 09/11).
+   La 1.0.1 aggiunge anche i quiz ministeriali ufficiali (listato MIT «Patente AB», 7.020 affermazioni, `scripts/build-ministeriale.mjs`), correzioni a incroci e simulatore.
+   AAB 1.0.1 (versionCode 3, 9,7 MB grazie alle figure in WebP) caricato il 09/11/2026 in Alpha e tester4; 25 modifiche pronte in Panoramica della pubblicazione, da inviare in revisione.
+   Caricamento AAB: dal browser di Claude il limite è 10 MB. Il service account `cercalibri-google-play` non ha accesso a questa app (403): per caricare via API va aggiunto in Play Console → Utenti e autorizzazioni.
 3. Prodotto in-app `patente_pro` a 2,99 € (Play lo permette solo dopo il primo AAB).
 4. Scheda dello store in 5 lingue (testi in `store-assets/listing.json`, campi `name`, `playShort`, `description`), icona e feature graphic in `store-assets/play/`, screenshot `*-android-1080x1920.png`.
 5. Questionari: classificazione dei contenuti, Data Safety (stesse categorie di App Privacy), pubblico di destinazione (13+), annunci: sì, accesso all'app: nessun login.
