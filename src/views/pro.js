@@ -89,6 +89,15 @@ export function simulatorView(c) {
     ['L', tr(['Fari', 'Phares', 'Headlights', 'Luces', 'Licht'], c.lang)], ['Spazio', tr(['Freno a mano', 'Frein à main', 'Handbrake', 'Freno de mano', 'Handbremse'], c.lang)],
     ['H', tr(['Clacson', 'Klaxon', 'Horn', 'Claxon', 'Hupe'], c.lang)], ['V', tr(['Cambia vista', 'Changer de vue', 'Change view', 'Cambiar vista', 'Ansicht'], c.lang)]
   ];
+  const L = Object.fromEntries(Object.entries({
+    blinkL: ['Sx', 'G', 'L', 'Izq.', 'Li.'], blinkR: ['Dx', 'D', 'R', 'Der.', 'Re.'],
+    hazard: ['Emerg.', 'Warn.', 'Hazard', 'Emerg.', 'Warn.'], mirror: ['Specchi', 'Rétros', 'Mirrors', 'Espejos', 'Spiegel'],
+    belt: ['Cintura', 'Ceinture', 'Belt', 'Cinturón', 'Gurt'], lights: ['Fari', 'Phares', 'Lights', 'Luces', 'Licht'],
+    horn: ['Clacson', 'Klaxon', 'Horn', 'Claxon', 'Hupe'], view: ['Vista', 'Vue', 'View', 'Vista', 'Ansicht'],
+    steer: ['Volante: trascina', 'Volant : fais glisser', 'Wheel: drag', 'Volante: arrastra', 'Lenkrad: ziehen'],
+    gear: ['Marcia', 'Vitesse', 'Gear', 'Marcha', 'Gang'], handbrake: ['Freno a mano', 'Frein à main', 'Handbrake', 'Freno de mano', 'Handbremse'],
+    brake: ['FRENO', 'FREIN', 'BRAKE', 'FRENO', 'BREMSE'], gas: ['GAS', 'GAZ', 'GAS', 'GAS', 'GAS']
+  }).map(([k, v]) => [k, tr(v, c.lang)]));
   const html = `
   <a class="back" href="#/pro">← Pro</a>
   <h1 class="page-title">🚗 ${esc(t('simulator'))}</h1>
@@ -97,20 +106,14 @@ export function simulatorView(c) {
     <canvas id="sim" class="sim-canvas"></canvas>
     <div class="sim-top"><div class="sim-msg" id="simmsg"></div><div class="sim-faults" id="simfaults"></div></div>
     <div class="sim-controls">
-      <div class="sim-row">
-        <button data-c="blinkL" class="sc">◀</button>
-        <button data-c="hazard" class="sc">⚠️</button>
-        <button data-c="blinkR" class="sc">▶</button>
-        <button data-c="mirror" class="sc">🪞</button>
-        <button data-c="belt" class="sc" id="beltbtn">🔔</button>
-        <button data-c="lights" class="sc">💡</button>
-        <button data-c="horn" class="sc">📯</button>
-        <button data-c="view" class="sc">🎥</button>
+      <div class="sim-row sim-aux">
+        ${[['blinkL', '◀', L.blinkL], ['hazard', '⚠️', L.hazard], ['blinkR', '▶', L.blinkR], ['mirror', '🪞', L.mirror], ['belt', '🔔', L.belt], ['lights', '💡', L.lights], ['horn', '📯', L.horn], ['view', '🎥', L.view]]
+          .map(([k, ico, lb]) => `<button data-c="${k}" class="sc lab" ${k === 'belt' ? 'id="beltbtn"' : ''}><span>${ico}</span><small>${esc(lb)}</small></button>`).join('')}
       </div>
-      <div class="sim-row">
-        <div class="gears"><button data-c="P" class="sc g">P</button><button data-c="R" class="sc g">R</button><button data-c="D" class="sc g">D</button><button data-c="hb" class="sc g">(P)</button></div>
-        <div class="wheel-pad" id="wheel"><span id="wheelknob"></span></div>
-        <div class="pedals"><button class="pedal brake" data-p="brake">⏸</button><button class="pedal gas" data-p="gas">▲</button></div>
+      <div class="sim-drive">
+        <div class="steer-wrap"><div class="steer" id="wheel"><svg viewBox="0 0 100 100" id="wheelknob" aria-hidden="true"><circle cx="50" cy="50" r="44" fill="none" stroke="#cbd5e1" stroke-width="9"/><circle cx="50" cy="50" r="11" fill="#cbd5e1"/><path d="M8 50 H39 M61 50 H92 M50 61 V93" stroke="#cbd5e1" stroke-width="8" stroke-linecap="round"/><circle cx="50" cy="7" r="4" fill="#f59e0b"/></svg></div><small>${esc(L.steer)}</small></div>
+        <div class="gearbox"><small>${esc(L.gear)}</small><div class="gears"><button data-c="P" class="sc g">P</button><button data-c="R" class="sc g">R</button><button data-c="D" class="sc g">D</button></div><button data-c="hb" class="sc g hb">(P) ${esc(L.handbrake)}</button></div>
+        <div class="pedals"><button class="pedal brake" data-p="brake">${esc(L.brake)}</button><button class="pedal gas" data-p="gas">${esc(L.gas)}</button></div>
       </div>
     </div>
     <button class="sim-fs" id="fs" aria-label="fullscreen">⛶</button>
@@ -192,12 +195,22 @@ export function simulatorView(c) {
       const off = () => { sim.setTouch(p.dataset.p, false); p.classList.remove('on'); };
       p.addEventListener('pointerdown', on); p.addEventListener('pointerup', off); p.addEventListener('pointerleave', off); p.addEventListener('pointercancel', off);
     });
+    // Steering wheel: drag around the centre (or sideways); up to ±120° of wheel = full lock. Springs back on release.
     const wheel = root.querySelector('#wheel'), knob = root.querySelector('#wheelknob');
-    const steerFrom = e => { const r = wheel.getBoundingClientRect(); const v = Math.max(-1, Math.min(1, ((e.clientX - r.left) / r.width) * 2 - 1)); sim.setTouch('steer', v); knob.style.left = `${(v + 1) * 50}%`; };
-    wheel.addEventListener('pointerdown', e => { wheel.setPointerCapture(e.pointerId); steerFrom(e); });
-    wheel.addEventListener('pointermove', e => { if (e.buttons) steerFrom(e); });
-    const release = () => { sim.setTouch('steer', 0); knob.style.left = '50%'; };
-    wheel.addEventListener('pointerup', release); wheel.addEventListener('pointercancel', release);
+    let grab = null; // { a0, v0 }
+    const angleOf = e => { const r = wheel.getBoundingClientRect(); return Math.atan2(e.clientY - (r.top + r.height / 2), e.clientX - (r.left + r.width / 2)); };
+    const setSteer = v => { v = Math.max(-1, Math.min(1, v)); sim.setTouch('steer', v); knob.style.transform = `rotate(${v * 120}deg)`; return v; };
+    let cur = 0;
+    wheel.addEventListener('pointerdown', e => { e.preventDefault(); wheel.setPointerCapture(e.pointerId); grab = { a0: angleOf(e), v0: cur, x0: e.clientX }; });
+    wheel.addEventListener('pointermove', e => {
+      if (!grab) return;
+      let da = angleOf(e) - grab.a0;
+      while (da > Math.PI) da -= 2 * Math.PI; while (da < -Math.PI) da += 2 * Math.PI;
+      const byAngle = da / (Math.PI * 2 / 3), byDrag = (e.clientX - grab.x0) / (wheel.clientWidth * 0.8);
+      cur = setSteer(grab.v0 + (Math.abs(byAngle) > Math.abs(byDrag) ? byAngle : byDrag));
+    });
+    const release = () => { grab = null; cur = setSteer(0); };
+    wheel.addEventListener('pointerup', release); wheel.addEventListener('pointercancel', release); wheel.addEventListener('lostpointercapture', release);
     // In-app full screen (fixed overlay). The native Fullscreen API collapses the canvas inside the iOS WebView,
     // so it is not used.
     const wrap = root.querySelector('#simwrap');

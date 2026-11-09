@@ -7,12 +7,12 @@ import { speakText, stopSpeaking } from '../simulator/audio.js';
 import { plain } from './util.js';
 
 const HERO = {
-  'it-14': '/images/intersection_priority.jpg', 'it-15': '/images/highway_overtaking.jpg', 'it-16': '/images/parking_maneuver.jpg', 'it-17': '/images/highway_overtaking.jpg', 'it-18': '/images/cockpit_view.jpg', 'it-25': '/images/cockpit_view.jpg',
-  'fr-L': '/images/intersection_priority.jpg', 'fr-R': '/images/highway_overtaking.jpg', 'fr-P': '/images/parking_maneuver.jpg', 'fr-M': '/images/cockpit_view.jpg',
-  'es-1': '/images/intersection_priority.jpg', 'es-3': '/images/highway_overtaking.jpg', 'es-4': '/images/parking_maneuver.jpg',
-  'de-2': '/images/intersection_priority.jpg', 'de-3': '/images/highway_overtaking.jpg',
-  'uk-4': '/images/highway_overtaking.jpg', 'uk-5': '/images/intersection_priority.jpg',
-  'ci-2': '/images/intersection_priority.jpg', 'ci-3': '/images/highway_overtaking.jpg'
+  'it-14': 'images/intersection_priority.jpg', 'it-15': 'images/highway_overtaking.jpg', 'it-16': 'images/parking_maneuver.jpg', 'it-17': 'images/highway_overtaking.jpg', 'it-18': 'images/cockpit_view.jpg', 'it-25': 'images/cockpit_view.jpg',
+  'fr-L': 'images/intersection_priority.jpg', 'fr-R': 'images/highway_overtaking.jpg', 'fr-P': 'images/parking_maneuver.jpg', 'fr-M': 'images/cockpit_view.jpg',
+  'es-1': 'images/intersection_priority.jpg', 'es-3': 'images/highway_overtaking.jpg', 'es-4': 'images/parking_maneuver.jpg',
+  'de-2': 'images/intersection_priority.jpg', 'de-3': 'images/highway_overtaking.jpg',
+  'uk-4': 'images/highway_overtaking.jpg', 'uk-5': 'images/intersection_priority.jpg',
+  'ci-2': 'images/intersection_priority.jpg', 'ci-3': 'images/highway_overtaking.jpg'
 };
 
 export function courseView(c) {

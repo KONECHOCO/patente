@@ -48,7 +48,7 @@ const previewNative = env.DEV && typeof location !== 'undefined' && location.sea
 
 export const ads = {
   native: native || previewNative,
-  canDemo: env.DEV && !native,
+  canDemo: (env.DEV || env.VITE_DEMO === '1') && !native,
   proPrice: previewNative ? '2,99 €' : null,
   adsReady: false,
   rewardedReady: false,

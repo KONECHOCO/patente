@@ -42,7 +42,10 @@ export const SIM_TXT = {
     failed: ['Prova non superata', 'Épreuve échouée', 'Test failed', 'Prueba no superada', 'Nicht bestanden'],
     parkOk: ['Parcheggio corretto!', 'Stationnement réussi !', 'Parked correctly!', '¡Aparcado correctamente!', 'Richtig eingeparkt!'],
     stopToFinish: ['Fermati e tira il freno a mano (Spazio) per terminare', 'Arrête-toi et serre le frein à main (Espace)', 'Stop and apply the handbrake (Space) to finish', 'Para y echa el freno de mano (Espacio)', 'Anhalten und Handbremse ziehen (Leertaste)'],
-    distance: ['m', 'm', 'm', 'm', 'm']
+    distance: ['m', 'm', 'm', 'm', 'm'],
+    startBelt: ['1. Allaccia la cintura (🔔)', '1. Boucle ta ceinture (🔔)', '1. Fasten your seat belt (🔔)', '1. Abróchate el cinturón (🔔)', '1. Anschnallen (🔔)'],
+    startGear: ['2. Inserisci la marcia D', '2. Passe la vitesse D', '2. Select gear D', '2. Pon la marcha D', '2. Gang D einlegen'],
+    startGas: ['3. Freccia, specchi, poi premi GAS', '3. Clignotant, rétros, puis GAZ', '3. Signal, mirrors, then press GAS', '3. Intermitente, espejos, luego GAS', '3. Blinken, Spiegel, dann GAS']
   },
   nav: {
     right: ['Al prossimo incrocio svolta a destra', 'À la prochaine intersection, tourne à droite', 'At the next junction turn right', 'En el próximo cruce gira a la derecha', 'An der nächsten Kreuzung rechts abbiegen'],
@@ -375,6 +378,9 @@ export class DrivingSimulator {
       acc -= Math.sign(c.v) * (0.25 + 0.0022 * c.v * c.v);
       if (!up && !down && Math.abs(c.v) < 1.2) acc += dir * 0.7 * (1 - Math.abs(c.v) / 1.4); // automatic creep
     }
+    // electric parking brake: releases by itself when pulling away in D or R
+    if (up && c.handbrake && (c.gear === 'D' || c.gear === 'R')) { c.handbrake = false; this.emit(); }
+    if (up && c.gear === 'P' && !this.flashT) this.flash(c.belt ? 'D ▶' : '🔔');
     const prevV = c.v;
     c.v += acc * dt;
     if (Math.sign(prevV) !== Math.sign(c.v) && prevV !== 0 && (down || c.handbrake || c.gear === 'P')) c.v = 0;
@@ -653,6 +659,13 @@ export class DrivingSimulator {
   }
 
   updateNav() {
+    // first steps for beginners, until the car moves: belt, gear D, gas (the electric parking brake releases itself)
+    if (!this.startedMoving && !this.parkTarget) {
+      const c0 = this.car;
+      const step = !c0.belt ? SIM_TXT.ui.startBelt : c0.gear === 'P' ? SIM_TXT.ui.startGear : SIM_TXT.ui.startGas;
+      this.msg = tx(step, this.lang);
+      return;
+    }
     if (!this.route.length) { this.msg = ''; return; }
     const c = this.car;
     const wp = this.route[this.routeIdx];

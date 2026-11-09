@@ -13,14 +13,14 @@ export const minLoaded = () => !!state;
 export function loadMinisteriale() {
   if (state) return Promise.resolve(state);
   if (!loading) {
-    loading = fetch('/ministeriale/listato.json')
+    loading = fetch(`${import.meta.env.BASE_URL}ministeriale/listato.json`)
       .then(r => { if (!r.ok) throw new Error(`HTTP ${r.status}`); return r.json(); })
       .then(raw => {
         const topics = raw.topics;
         const questions = raw.q.map(([id, group, topic, text, ans, fig]) => ({
           id: MIN_PREFIX + id, group, topic, chapterId: `mint-${topic}`, format: 'tf', official: true,
           q: { it: text }, answer: !!ans, correct: [ans ? 0 : 1], e: null,
-          fig: fig >= 0 ? `/ministeriale/fig/${raw.figs[fig]}` : null
+          fig: fig >= 0 ? `${import.meta.env.BASE_URL}ministeriale/fig/${raw.figs[fig]}` : null
         }));
         state = { meta: raw.meta, topics, questions, byId: new Map(questions.map(q => [q.id, q])) };
         return state;
