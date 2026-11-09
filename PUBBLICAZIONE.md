@@ -35,7 +35,7 @@ App "Patente Facile: Quiz e Guida", pacchetto `com.ikonet.patente`, id Console 4
    **Respinta da Google il 09/11/2026** per *Misleading Claims — Missing Source Link for Government Information*. Correzione nella 1.0.1: scheda "Fonti ufficiali" con link governativi (Home, Impostazioni, ogni capitolo, quiz ufficiali), dichiarazione di indipendenza, link nelle descrizioni dello store in 5 lingue (salvate in Console il 09/11).
    La 1.0.1 aggiunge anche i quiz ministeriali ufficiali (listato MIT «Patente AB», 7.020 affermazioni, `scripts/build-ministeriale.mjs`), correzioni a incroci e simulatore.
    AAB 1.0.1 (versionCode 3, 9,7 MB grazie alle figure in WebP) caricato il 09/11/2026 in Alpha e tester4; 25 modifiche pronte in Panoramica della pubblicazione, da inviare in revisione.
-   Aggiornato il 09/11: bozze sostituite con il bundle 4 (1.0.1, nuovi comandi del simulatore) in Alpha e tester4; 25 modifiche ancora da inviare dopo la prova dell'utente.
+   Aggiornato il 09/11: bozze sostituite con il bundle 4 (1.0.1, nuovi comandi del simulatore) in Alpha e tester4; 25 modifiche **inviate in revisione** il 09/11/2026.
    iOS: build 3 (1.0.0) caricata il 09/11/2026, in TestFlight per il gruppo interno "Developer".
    Versione web di prova (Pro sbloccabile gratis, `noindex`): https://konechoco.github.io/patente/app/ — build con `VITE_DEMO=1 npx vite build --base /patente/app/` (da PowerShell: Git Bash riscrive il percorso di `--base`), copiata nel repo KONECHOCO.github.io.
    Caricamento AAB: dal browser di Claude il limite è 10 MB. Il service account `cercalibri-google-play` non ha accesso a questa app (403): per caricare via API va aggiunto in Play Console → Utenti e autorizzazioni.
