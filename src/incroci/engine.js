@@ -182,17 +182,52 @@ const EXIT = [[125, 200], [200, 175], [175, 100], [100, 125]];
 const CAR_POS = [[175, 238], [238, 125], [125, 62], [62, 175]];
 const HEADING = [0, -90, 180, 90]; // rotation of a car drawn facing up
 
-function pathD(v) {
+// Outward direction of each arm (S, E, N, W): vehicles leave the junction along their lane, never diagonally.
+const OUT = [[0, 1], [1, 0], [0, -1], [-1, 0]];
+
+function geometry(v) {
   const e = ENTRY[v.arm];
   const exitArm = (v.arm + EXIT_OFFSET[v.move]) % 4;
   const x = EXIT[exitArm];
   const start = CAR_POS[v.arm];
   let ctrl;
   if (v.move === 'S') ctrl = [(e[0] + x[0]) / 2, (e[1] + x[1]) / 2];
-  else if (v.move === 'R') ctrl = v.arm % 2 === 0 ? [e[0], x[1]] : [x[0], e[1]];
-  else ctrl = v.arm % 2 === 0 ? [e[0], x[1]] : [x[0], e[1]];
-  const far = [x[0] + (x[0] - 150) * 0.55, x[1] + (x[1] - 150) * 0.55];
+  else {
+    const corner = v.arm % 2 === 0 ? [e[0], x[1]] : [x[0], e[1]];
+    // right turns hug the corner; left turns are drawn tighter so that two opposite left turns pass in front of each other
+    const k = v.move === 'R' ? 1 : 0.35;
+    const mid = [(e[0] + x[0]) / 2, (e[1] + x[1]) / 2];
+    ctrl = [mid[0] + (corner[0] - mid[0]) * k, mid[1] + (corner[1] - mid[1]) * k];
+  }
+  const o = OUT[exitArm];
+  const far = [x[0] + o[0] * 140, x[1] + o[1] * 140];
+  return { start, e, ctrl, x, far };
+}
+
+function pathD(v) {
+  const { start, e, ctrl, x, far } = geometry(v);
   return `M${start[0]},${start[1]} L${e[0]},${e[1]} Q${ctrl[0]},${ctrl[1]} ${x[0]},${x[1]} L${far[0]},${far[1]}`;
+}
+
+// Polyline sampling of a vehicle path with cumulative lengths, for collision-free timing.
+function samplePath(v) {
+  const { start, e, ctrl, x, far } = geometry(v);
+  const pts = [start, e];
+  for (let i = 1; i <= 16; i++) {
+    const t = i / 16, u = 1 - t;
+    pts.push([u * u * e[0] + 2 * u * t * ctrl[0] + t * t * x[0], u * u * e[1] + 2 * u * t * ctrl[1] + t * t * x[1]]);
+  }
+  pts.push(far);
+  const s = [0];
+  for (let i = 1; i < pts.length; i++) s.push(s[i - 1] + Math.hypot(pts[i][0] - pts[i - 1][0], pts[i][1] - pts[i - 1][1]));
+  return { pts, s, total: s[s.length - 1] };
+}
+function posAt(p, frac) {
+  const d = Math.max(0, Math.min(1, frac)) * p.total;
+  let i = 1;
+  while (i < p.s.length - 1 && p.s[i] < d) i++;
+  const a = p.pts[i - 1], b = p.pts[i], seg = p.s[i] - p.s[i - 1] || 1, t = (d - p.s[i - 1]) / seg;
+  return [a[0] + (b[0] - a[0]) * t, a[1] + (b[1] - a[1]) * t];
 }
 
 function vehicleSvg(v, highlight) {
@@ -250,13 +285,52 @@ export function renderJunction(scn, { showPaths = true, highlight = [], done = [
 }
 
 // Same junction, with every vehicle driving along its path in the solved order.
+// Timeline in seconds: vehicles of one step move together, unless their paths would make them touch,
+// in which case the later one waits a little. The next step starts when the previous one has left.
+export function junctionTimeline(scn, dur = 1.6) {
+  const byId = Object.fromEntries(scn.vehicles.map(v => [v.id, v]));
+  const paths = Object.fromEntries(scn.vehicles.map(v => [v.id, samplePath(v)]));
+  const D = dur * 0.95; // driving time of one vehicle
+  const sched = {}; // id -> start time
+  const pos = (id, t) => {
+    const t0 = sched[id];
+    if (t0 == null || t < t0) return paths[id].pts[0];
+    return posAt(paths[id], (t - t0) / D);
+  };
+  const minGap = 34;
+  let cursor = 0;
+  for (const step of scn.solution.steps) {
+    const placed = [];
+    for (const id of step) {
+      let chosen = 0;
+      for (const off of [0, 0.35, 0.7, 1.05, 1.4].map(f => f * dur)) {
+        const t0 = cursor + off;
+        let ok = true;
+        for (let t = t0; t <= t0 + D && ok; t += D / 40) {
+          const p = posAt(paths[id], (t - t0) / D);
+          for (const o of placed) {
+            const q = pos(o, t);
+            const gap = byId[o].kind === 'tram' || byId[id].kind === 'tram' ? 46 : minGap;
+            if (Math.hypot(p[0] - q[0], p[1] - q[1]) < gap) { ok = false; break; }
+          }
+        }
+        chosen = off;
+        if (ok) break;
+      }
+      sched[id] = cursor + chosen;
+      placed.push(id);
+    }
+    cursor = Math.max(...step.map(id => sched[id])) + D;
+  }
+  return { start: sched, dur, total: cursor + 0.8 };
+}
+
 export function renderJunctionAnimated(scn, stepDur = 1.6) {
-  const steps = scn.solution.steps;
-  const total = steps.length * stepDur + 0.8;
+  const tl = junctionTimeline(scn, stepDur);
+  const total = tl.total;
   const base = renderJunction(scn, { showPaths: true, hideVehicles: true });
   const cars = scn.vehicles.map(v => {
-    const k = steps.findIndex(s => s.includes(v.id));
-    const a = (k * stepDur) / total, b = Math.min(1, (k * stepDur + stepDur * 0.95) / total);
+    const a = tl.start[v.id] / total, b = Math.min(1, (tl.start[v.id] + stepDur * 0.95) / total);
     const inner = vehicleSvg({ ...v, arm: 0 }, false)
       .replace(/transform="translate\([^)]*\) rotate\([^)]*\)"/, 'transform="rotate(90)"');
     return `<g>${inner}<animateMotion dur="${total}s" repeatCount="indefinite" rotate="auto" keyPoints="0;0;1;1" keyTimes="0;${a.toFixed(3)};${b.toFixed(3)};1" calcMode="linear" path="${pathD(v)}"/></g>`;

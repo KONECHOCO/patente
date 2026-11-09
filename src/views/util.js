@@ -79,6 +79,19 @@ export function passPrediction(c) {
   return { pct: Math.round(prob * 100), acc: Math.round(p * 100), byChapter };
 }
 
+// Links to the official government sources the content is based on (Google Play "Misleading Claims").
+export function sourcesCard(c) {
+  const t = c.t;
+  return `<section class="card sources-card"><h2>🏛️ ${esc(t('officialSources'))}</h2>
+    <p class="muted small">${esc(t('sourcesNote'))}</p>
+    <ul class="source-list">${c.cfg.sources.map(s => `<li><a href="${esc(s.u)}" target="_blank" rel="noopener">${esc(s.l)}</a><small>${esc(s.u.replace(/^https?:\/\//, '').split('?')[0])}</small></li>`).join('')}</ul></section>`;
+}
+
+export function sourceLine(c, idx = 0) {
+  const s = c.cfg.sources[idx] || c.cfg.sources[0];
+  return `<p class="source-line">🏛️ ${esc(c.t('sourceShort'))}: <a href="${esc(s.u)}" target="_blank" rel="noopener">${esc(s.l)}</a></p>`;
+}
+
 export function proLock(c, icon, title, sub) {
   return `<a class="card pro-lock" href="#/pro"><span class="pl-ico">${icon}</span><span><b>${esc(title)}</b><small>${esc(sub)}</small></span><span class="pl-badge">🔒 ${esc(c.t('proOnly'))}</span></a>`;
 }

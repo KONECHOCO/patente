@@ -1,4 +1,4 @@
-import { esc, ring, readiness, chapterStats } from './util.js';
+import { esc, ring, readiness, chapterStats, sourcesCard, sourceLine } from './util.js';
 import { LICENCE_INFO } from '../data/countries.js';
 import { allQuestions } from '../content/index.js';
 import { agendaStore } from '../pro/agenda.js';
@@ -52,6 +52,7 @@ export function homeView(c) {
     ${exam.verify ? `<p class="warn">⚠️ ${esc(t('indicative'))} · ${esc(t('toVerify'))}</p>` : ''}
     <ul class="rules">${notes.map(n => `<li>${esc(n)}</li>`).join('')}</ul>
     <p class="muted small">${esc(c.cfg.authority)}</p>
+    ${sourceLine(c, c.country === 'IT' ? 1 : 0)}
   </section>
 
   <section class="card">
@@ -73,6 +74,8 @@ export function homeView(c) {
     <div class="licences">${c.cfg.licences.map(l => `<div class="lic ${l.id === c.s.licence ? 'active' : ''}"><b>${LICENCE_INFO[l.id]?.icon || '🚗'} ${l.id}</b><span>${esc(c.pick(LICENCE_INFO[l.id] || {}))}</span><small>${esc(t('minAge'))}: ${l.age} ${esc(t('years'))}${l.note ? ' · ' + esc(l.note) : ''}</small></div>`).join('')}</div>
   </section>
 
-  <p class="disclaimer">${esc(t('totalQuestions'))}: <b>${allQuestions(c.country).length}</b> · ${esc(t('disclaimer'))}<br>${esc(t('sources'))}: ${c.cfg.sources.map(s => `<a href="${esc(s)}" target="_blank" rel="noopener">${esc(s.replace(/^https?:\/\//, ''))}</a>`).join(' · ')}</p>`;
+  ${sourcesCard(c)}
+
+  <p class="disclaimer">${esc(t('totalQuestions'))}: <b>${allQuestions(c.country).length}</b> · ${esc(t('disclaimer'))}</p>`;
   return { html };
 }

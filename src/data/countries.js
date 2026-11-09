@@ -33,7 +33,7 @@ export const COUNTRIES = {
       { id: 'CE', age: 21 }, { id: 'D1', age: 21 }, { id: 'D', age: 24 }, { id: 'DE', age: 24 }
     ],
     practical: { it: 'Esame pratico con esaminatore della Motorizzazione: verifica dei comandi, manovre (parcheggio, retromarcia), guida in traffico urbano ed extraurbano. Errori gravi (precedenza, semaforo rosso, pericolo) comportano la bocciatura immediata.', en: 'Road test with a Motorizzazione examiner: controls check, manoeuvres (parking, reversing), driving in urban and rural traffic. Serious errors (right of way, red light, danger) mean an immediate fail.' },
-    sources: ['https://www.mit.gov.it', 'https://www.ilportaledellautomobilista.it']
+    sources: [{ l: 'Codice della Strada (D.Lgs. 285/1992) — Normattiva', u: 'https://www.normattiva.it/uri-res/N2Ls?urn:nir:stato:decreto.legislativo:1992-04-30;285' }, { l: 'Quiz ministeriali patente AM/B — Portale dell’Automobilista (MIT)', u: 'https://www.ilportaledellautomobilista.it/web/portale-automobilista/-/quiz-per-le-patenti-am-b-superiori-e-cqc' }, { l: 'Ministero delle Infrastrutture e dei Trasporti', u: 'https://www.mit.gov.it' }]
   },
   FR: {
     code: 'FR', flag: '🇫🇷', name: 'France', defaultLang: 'fr', contentLangs: ['fr', 'en'], drive: 'right',
@@ -54,7 +54,7 @@ export const COUNTRIES = {
       { id: 'CE', age: 21 }, { id: 'D1', age: 21 }, { id: 'D', age: 24 }, { id: 'DE', age: 24 }
     ],
     practical: { fr: 'Évaluation sur 31 points : connaître et maîtriser son véhicule, appréhender la route, partager la route, autonomie et conscience du risque, courtoisie et conduite économique.', en: 'Scored out of 31: vehicle control, reading the road, sharing the road, autonomy and risk awareness, courtesy and eco-driving.' },
-    sources: ['https://www.securite-routiere.gouv.fr', 'https://www.service-public.fr']
+    sources: [{ l: 'Code de la route — Légifrance', u: 'https://www.legifrance.gouv.fr/codes/texte_lc/LEGITEXT000006074228' }, { l: 'Sécurité routière (gouvernement)', u: 'https://www.securite-routiere.gouv.fr' }, { l: 'Service-Public.fr — permis de conduire', u: 'https://www.service-public.fr' }]
   },
   ES: {
     code: 'ES', flag: '🇪🇸', name: 'España', defaultLang: 'es', contentLangs: ['es', 'en'], drive: 'right',
@@ -74,7 +74,7 @@ export const COUNTRIES = {
       { id: 'B', age: 18 }, { id: 'BE', age: 18 }, { id: 'C1', age: 18 }, { id: 'C', age: 21 }, { id: 'D1', age: 21 }, { id: 'D', age: 24 }
     ],
     practical: { es: 'Prueba de circulación en vías abiertas al tráfico; las faltas se clasifican en eliminatorias, deficientes y leves.', en: 'On-road test; faults are classified as eliminating, serious and minor.' },
-    sources: ['https://www.dgt.es']
+    sources: [{ l: 'Reglamento General de Circulación — BOE', u: 'https://www.boe.es/buscar/act.php?id=BOE-A-2003-23514' }, { l: 'Dirección General de Tráfico (DGT)', u: 'https://www.dgt.es' }]
   },
   DE: {
     code: 'DE', flag: '🇩🇪', name: 'Deutschland', defaultLang: 'de', contentLangs: ['de', 'en'], drive: 'right',
@@ -94,7 +94,7 @@ export const COUNTRIES = {
       { id: 'B', age: 18, note: '17 mit BF17' }, { id: 'BE', age: 18 }, { id: 'C1', age: 18 }, { id: 'C', age: 21 }, { id: 'D1', age: 21 }, { id: 'D', age: 24 }
     ],
     practical: { de: 'Prüfungsfahrt mit amtlich anerkanntem Prüfer: Abfahrtkontrolle, Grundfahraufgaben, Fahrt innerorts, außerorts und auf der Autobahn.', en: 'Road test with an official examiner: vehicle check, basic manoeuvres, urban, rural and motorway driving.' },
-    sources: ['https://www.kba.de', 'https://www.tuev-nord.de']
+    sources: [{ l: 'Straßenverkehrs-Ordnung (StVO) — gesetze-im-internet.de', u: 'https://www.gesetze-im-internet.de/stvo_2013/' }, { l: 'Fahrerlaubnis-Verordnung (FeV) — gesetze-im-internet.de', u: 'https://www.gesetze-im-internet.de/fev_2010/' }, { l: 'Kraftfahrt-Bundesamt (KBA)', u: 'https://www.kba.de' }]
   },
   UK: {
     code: 'UK', flag: '🇬🇧', name: 'United Kingdom', defaultLang: 'en', contentLangs: ['en'], drive: 'left',
@@ -110,7 +110,7 @@ export const COUNTRIES = {
     novice: { en: 'New drivers: 6 penalty points within 2 years of passing revokes the licence. Optional green "P" plates.' },
     licences: [{ id: 'AM', age: 16 }, { id: 'A1', age: 17 }, { id: 'A2', age: 19 }, { id: 'A', age: 24, note: '21 via progressive access' }, { id: 'B', age: 17 }],
     practical: { en: 'Eyesight check, "show me, tell me" questions, general driving, one reversing exercise and about 20 minutes of independent driving.' },
-    sources: ['https://www.gov.uk/theory-test', 'https://www.gov.uk/guidance/the-highway-code']
+    sources: [{ l: 'The Highway Code — GOV.UK', u: 'https://www.gov.uk/guidance/the-highway-code' }, { l: 'Driving theory test — GOV.UK (DVSA)', u: 'https://www.gov.uk/theory-test' }]
   },
   CI: {
     code: 'CI', flag: '🇨🇮', name: 'Côte d\'Ivoire', defaultLang: 'fr', contentLangs: ['fr', 'en'], drive: 'right',
@@ -127,7 +127,7 @@ export const COUNTRIES = {
     novice: null,
     licences: [{ id: 'A', age: 18 }, { id: 'B', age: 18 }, { id: 'C', age: 21 }, { id: 'D', age: 21 }, { id: 'E', age: 21 }],
     practical: { fr: 'Épreuve en circulation avec un examinateur : manœuvres, respect de la signalisation et des priorités.', en: 'On-road test with an examiner: manoeuvres, signs and priorities.' },
-    sources: ['https://www.transports.gouv.ci']
+    sources: [{ l: 'Ministère des Transports de Côte d’Ivoire', u: 'https://www.transports.gouv.ci' }]
   }
 };
 

@@ -51,6 +51,7 @@ export const SIM_TXT = {
     roundabout: n => [`Alla rotatoria prendi la ${n}ª uscita`, `Au rond-point, prends la ${n}e sortie`, `At the roundabout take exit ${n}`, `En la glorieta toma la ${n}ª salida`, `Im Kreisverkehr die ${n}. Ausfahrt`],
     stopKerb: ['Accosta a destra e fermati', 'Gare-toi sur le côté', 'Pull over and stop', 'Arrima y detente', 'Rechts ranfahren und anhalten'],
     park: ['Parcheggia nel posto evidenziato in giallo', 'Gare-toi dans la place jaune', 'Park in the yellow bay', 'Aparca en la plaza amarilla', 'Im gelben Feld parken'],
+    wrong: ['Strada sbagliata: torna sul percorso (punto giallo sulla mappa)', 'Mauvaise route : reviens sur le parcours (point jaune sur la carte)', 'Wrong way: get back on the route (yellow dot on the map)', 'Camino equivocado: vuelve a la ruta (punto amarillo en el mapa)', 'Falsch abgebogen: zurück zur Route (gelber Punkt auf der Karte)'],
     wait: ['Attendi…', 'Patiente…', 'Wait…', 'Espera…', 'Warten…']
   }
 };
@@ -191,10 +192,12 @@ export class DrivingSimulator {
 
   resize() {
     const r = this.cv.getBoundingClientRect();
-    const dpr = Math.min(2, window.devicePixelRatio || 1);
-    this.W = Math.max(320, Math.round(r.width * dpr));
-    this.H = Math.max(200, Math.round(r.height * dpr));
-    this.cv.width = this.W; this.cv.height = this.H;
+    if (!r.width || !r.height) return; // hidden or not laid out yet
+    const dpr = Math.min(1.5, window.devicePixelRatio || 1);
+    const W = Math.max(320, Math.round(r.width * dpr)), H = Math.max(200, Math.round(r.height * dpr));
+    if (W === this.W && H === this.H) return;
+    this.W = W; this.H = H;
+    this.cv.width = W; this.cv.height = H;
     this.dpr = dpr;
   }
 
@@ -232,6 +235,7 @@ export class DrivingSimulator {
     this.startedMoving = false;
     this.lightsTimer = 0;
     this.lastRbAngle = null;
+    this.wrongWay = false;
 
     // ambient AI traffic on two loops
     this.ai.push(this.makeAI(loopPath(60, 60, 180, 180, s), 30, '#3b82f6'));
@@ -659,12 +663,18 @@ export class DrivingSimulator {
       this.msg = `${tx(SIM_TXT.nav.stopKerb, this.lang)} · ${Math.round(d)} m`;
       return;
     }
-    if (d < wp.r) { wp.reached = true; }
-    if (wp.reached && d > wp.r + 2) this.routeIdx++;
+    if (d < wp.r && !wp.reached) { wp.reached = true; wp.th0 = c.th; }
+    if (wp.reached && d > wp.r + 2) {
+      // the junction was passed: check that the driver went the way the examiner asked
+      const turn = wrap(c.th - wp.th0);
+      const did = Math.abs(turn) < 0.6 ? 'straight' : turn > 0 ? 'right' : 'left';
+      if (wp.nav === 'roundabout' || did === wp.nav) { this.routeIdx++; this.wrongWay = false; }
+      else { wp.reached = false; this.wrongWay = true; }
+    }
     const cur = this.route[this.routeIdx];
     if (!cur) return;
     const txt = cur.nav === 'roundabout' ? tx(SIM_TXT.nav.roundabout(cur.exit), this.lang) : tx(SIM_TXT.nav[cur.nav], this.lang);
-    this.msg = `${txt} · ${Math.round(Math.hypot(c.x - cur.x, c.y - cur.y))} m`;
+    this.msg = (this.wrongWay ? tx(SIM_TXT.nav.wrong, this.lang) + ' — ' : '') + `${txt} · ${Math.round(Math.hypot(c.x - cur.x, c.y - cur.y))} m`;
   }
 
   checkParking() {
@@ -734,15 +744,16 @@ export class DrivingSimulator {
     tg.drawImage(this.ground, 0, 0);
     tg.setTransform(1, 0, 0, 1, 0, 0);
     const bottom = vp.y + vp.h;
-    for (let y = Math.ceil(horizon) + 1; y < bottom; y++) {
+    const rowStep = Math.max(1, Math.round((bottom - horizon) / 380));
+    for (let y = Math.ceil(horizon) + 1; y < bottom; y += rowStep) {
       const f = cam.h * focal / (y - horizon);
       if (f > viewDist) continue;
       const half = f * (vp.w / 2) / focal;
       const sw = half * 2 * tScale;
       const sx = T.width / 2 - half * tScale;
       const sy = T.height - f * tScale;
-      if (mirror) { g.save(); g.translate(vp.x * 2 + vp.w, 0); g.scale(-1, 1); g.drawImage(T, sx, sy, sw, 1, vp.x, y, vp.w, 1.4); g.restore(); }
-      else g.drawImage(T, sx, sy, sw, 1, vp.x, y, vp.w, 1.4);
+      if (mirror) { g.save(); g.translate(vp.x * 2 + vp.w, 0); g.scale(-1, 1); g.drawImage(T, sx, sy, sw, 1, vp.x, y, vp.w, rowStep + 0.4); g.restore(); }
+      else g.drawImage(T, sx, sy, sw, 1, vp.x, y, vp.w, rowStep + 0.4);
     }
     // haze near the horizon
     const haze = g.createLinearGradient(0, horizon - 2, 0, horizon + vp.h * 0.08);

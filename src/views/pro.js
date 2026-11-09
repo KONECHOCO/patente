@@ -198,12 +198,21 @@ export function simulatorView(c) {
     wheel.addEventListener('pointermove', e => { if (e.buttons) steerFrom(e); });
     const release = () => { sim.setTouch('steer', 0); knob.style.left = '50%'; };
     wheel.addEventListener('pointerup', release); wheel.addEventListener('pointercancel', release);
-    root.querySelector('#fs').addEventListener('click', () => {
-      const w = root.querySelector('#simwrap');
-      if (document.fullscreenElement) document.exitFullscreen(); else w.requestFullscreen?.().then(() => setTimeout(() => sim.resize(), 200)).catch(() => {});
-    });
-    document.addEventListener('fullscreenchange', () => setTimeout(() => sim.resize(), 150));
-    return () => sim.destroy();
+    // In-app full screen (fixed overlay). The native Fullscreen API collapses the canvas inside the iOS WebView,
+    // so it is not used.
+    const wrap = root.querySelector('#simwrap');
+    const setFull = on => {
+      wrap.classList.toggle('sim-full', on);
+      document.documentElement.classList.toggle('sim-lock', on);
+      root.querySelector('#fs').textContent = on ? '✕' : '⛶';
+      requestAnimationFrame(() => sim.resize());
+    };
+    root.querySelector('#fs').addEventListener('click', () => setFull(!wrap.classList.contains('sim-full')));
+    const onEsc = e => { if (e.key === 'Escape' && wrap.classList.contains('sim-full')) setFull(false); };
+    window.addEventListener('keydown', onEsc);
+    const ro = typeof ResizeObserver !== 'undefined' ? new ResizeObserver(() => sim.resize()) : null;
+    ro?.observe(canvas);
+    return () => { window.removeEventListener('keydown', onEsc); ro?.disconnect(); document.documentElement.classList.remove('sim-lock'); sim.destroy(); };
   };
   return { html, mount, wide: true };
 }

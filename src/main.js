@@ -15,6 +15,7 @@ import { proView, simulatorView, agendaView } from './views/pro.js';
 import { settingsView, statsView } from './views/settings.js';
 import { initMonetization, trackAdAction, toggleTestAds } from './core/monetization.js';
 import { syncReminders } from './pro/reminders.js';
+import { loadMinisteriale, minLoaded } from './content/ministeriale.js';
 
 // ---------- tiny icon set ----------
 const svgI = d => `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${d}</svg>`;
@@ -98,6 +99,7 @@ function shell(c, tab, inner, opts = {}) {
 }
 
 let lastPath = null;
+let minFailed = false;
 function render() {
   stopSpeaking();
   if (cleanup) { try { cleanup(); } catch { /* view already gone */ } cleanup = null; }
@@ -107,6 +109,12 @@ function render() {
   if (lastPath && lastPath !== path && !/^\/(quiz\/run|pro\/sim)/.test(path) && !/^\/(quiz\/run|pro\/sim)/.test(lastPath)) trackAdAction();
   lastPath = path;
   const c = ctx();
+  // the official Italian question bank is loaded before any quiz/history screen needs it
+  if (c.country === 'IT' && !minLoaded() && !minFailed && /^\/(quiz|history)/.test(path)) {
+    app.innerHTML = shell(c, 'quiz', `<div class="card empty"><p>⏳ ${c.t('loading')}</p></div>`);
+    loadMinisteriale().then(render, () => { minFailed = true; render(); });
+    return;
+  }
   for (const [re, view, tab] of ROUTES) {
     const m = path.match(re);
     if (!m) continue;
@@ -123,6 +131,7 @@ window.addEventListener('hashchange', render);
 store.subscribe(() => applyTheme());
 if (!location.hash) location.hash = '/home';
 render();
+if (store.settings.country === 'IT') loadMinisteriale().catch(() => {});
 initMonetization().then(() => syncReminders()).catch(() => {});
 
 // 7 taps on the logo: test ads on/off for test builds (restart the app afterwards)

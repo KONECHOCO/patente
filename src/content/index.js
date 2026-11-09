@@ -14,6 +14,7 @@ import ci from './ci.js';
 import { COUNTRIES } from '../data/countries.js';
 import { ROAD_SIGNS, LANG_INDEX } from '../signs/catalog.js';
 import { scenarioList, statements, orderText } from '../incroci/engine.js';
+import { isMinId, minById } from './ministeriale.js';
 
 const RAW = { IT: [...it1, ...it2, ...it3].map(ch => ({ ...ch, q: [...ch.q, ...(itExtra[ch.id] || [])] })), FR: fr, ES: es, DE: de, UK: uk, CI: ci };
 
@@ -148,6 +149,7 @@ export function allQuestions(country) {
 }
 
 export function questionById(country, id) {
+  if (isMinId(id)) return country === 'IT' ? minById(id) : null;
   return allQuestions(country).find(q => q.id === id);
 }
 

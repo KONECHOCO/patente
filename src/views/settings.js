@@ -1,4 +1,4 @@
-import { esc, ring, readiness, chapterStats, bar, fmtDate, passPrediction, proLock } from './util.js';
+import { esc, ring, readiness, chapterStats, bar, fmtDate, passPrediction, proLock, sourcesCard } from './util.js';
 import { COUNTRIES, LANGS, LICENCE_INFO } from '../data/countries.js';
 import { allQuestions } from '../content/index.js';
 import { store } from '../core/store.js';
@@ -34,6 +34,7 @@ export function settingsView(c) {
     <button class="btn btn-ghost" id="restore-p" style="width:100%">⭐ ${esc(t('restore'))}</button>
     ${ads.native && !store.pro ? `<button class="btn btn-ghost" id="ad-privacy" style="width:100%;margin-top:8px">🛡️ ${esc(t('adPrivacy'))}</button>` : ''}
   </section>
+  ${sourcesCard(c)}
   ${ads.testAds && ads.native ? `<section class="card"><h2>ADS DEBUG</h2><pre class="diag">${ads.diag.map(esc).join('<br>') || '—'}</pre></section>` : ''}
   <section class="card">
     <button class="btn btn-danger" id="reset">🗑️ ${esc(t('resetProgress'))}</button>

@@ -6,6 +6,10 @@ import { scenarioList, renderJunction, explain } from '../incroci/engine.js';
 import { store } from '../core/store.js';
 import { sound } from '../simulator/audio.js';
 import { ads, trackAdAction, watchRewardedVideo } from '../core/monetization.js';
+import { minLoaded, minState, minExamSheet, minTopicSet, minTopic, minRelated } from '../content/ministeriale.js';
+
+const officialOn = c => c.country === 'IT' && minLoaded();
+const isExamMode = mode => mode === 'exam';
 
 export const FREE_EXAMS_PER_DAY = 3;
 
@@ -22,7 +26,7 @@ export function quizMenuView(c) {
   <h1 class="page-title">📝 ${esc(t('quiz'))}</h1>
   <a class="exam-cta" href="#/quiz/run/exam">
     <span class="exam-cta-ico">🏁</span>
-    <span><b>${esc(t('examSim'))}</b><small>${exam.questions} ${esc(t('questionsN'))} · ${exam.minutes} ${esc(t('min'))} · ${exam.maxPoints ? `≤ ${exam.maxPoints} ${esc(t('errorPoints'))}` : `≤ ${exam.maxErrors} ${esc(t('errors'))}`}</small>
+    <span><b>${esc(t('examSim'))}</b>${officialOn(c) ? `<small>📘 ${esc(t('officialExam'))}</small>` : ''}<small>${exam.questions} ${esc(t('questionsN'))} · ${exam.minutes} ${esc(t('min'))} · ${exam.maxPoints ? `≤ ${exam.maxPoints} ${esc(t('errorPoints'))}` : `≤ ${exam.maxErrors} ${esc(t('errors'))}`}</small>
     <small>${store.pro ? '♾️ ' + esc(t('unlimitedExams')) : `${Math.max(0, FREE_EXAMS_PER_DAY - store.examsToday())} ${esc(t('freeExamsLeft'))}`}</small></span>
   </a>
   <div class="modes">
@@ -34,6 +38,7 @@ export function quizMenuView(c) {
     ${c.cfg.drive === 'right' ? card('/junctions', '✖️', t('junctions'), t('junctionsSub')) : ''}
     ${card('/history', '🗂️', t('history'), t('historySub'), `<span class="badge">${c.p.history.length}</span>`)}
   </div>
+  ${officialOn(c) ? officialSection(c) : ''}
   <h2 class="section-title">${esc(t('byChapter'))}</h2>
   <div class="chapter-list compact">
     ${c.course.chapters.map(ch => {
@@ -45,12 +50,27 @@ export function quizMenuView(c) {
   return { html };
 }
 
+function officialSection(c) {
+  const t = c.t;
+  const st = minState();
+  const src = c.cfg.sources.find(s => s.u.includes('ilportaledellautomobilista')) || c.cfg.sources[0];
+  return `<h2 class="section-title">📘 ${esc(t('officialBank'))}</h2>
+  <p class="muted small">${esc(t('officialBankSub'))} · <b>${st.meta.total.toLocaleString(c.lang)}</b> ${esc(t('statementsN'))}<br>🏛️ ${esc(t('sourceShort'))}: <a href="${esc(src.u)}" target="_blank" rel="noopener">${esc(src.l)}</a></p>
+  <div class="chapter-list compact">${st.topics.map(tp => {
+    const qs = st.questions.filter(q => q.topic === tp.id);
+    const ok = qs.filter(q => c.p.answers[q.id]?.last === true).length;
+    return `<a class="chapter" href="#/quiz/run/mintopic/${tp.id}"><span class="ch-num">${tp.id}</span><span class="ch-body"><b>${esc(tp.short)}</b><small>${ok}/${qs.length}</small></span></a>`;
+  }).join('')}</div>`;
+}
+
 // ---------- building question sets ----------
 
 function examConfig(c) { return c.cfg.exam[c.s.licence] || c.cfg.exam.B; }
 
 function buildSet(c, mode, arg) {
   const pool = allQuestions(c.country);
+  if (mode === 'mintopic') return officialOn(c) ? minTopicSet(arg, c.p.answers) : [];
+  if (mode === 'exam' && officialOn(c)) return minExamSheet(c.p.answers);
   if (mode === 'exam') {
     const ex = examConfig(c);
     const n = Math.min(ex.questions, pool.length);
@@ -117,6 +137,7 @@ function evaluate(c, run) {
 // ---------- shared question rendering ----------
 
 function media(c, q) {
+  if (q.fig) return `<div class="q-media official"><img src="${esc(q.fig)}" alt="" loading="lazy"></div>`;
   if (q.sign) {
     const s = ROAD_SIGNS.find(x => x.id === q.sign);
     if (s) return `<div class="q-media">${renderSign(s.spec, { country: c.country })}</div>`;
@@ -130,6 +151,13 @@ function media(c, q) {
 
 function explanationHtml(c, q) {
   const parts = [];
+  if (q.official) {
+    const t = c.t;
+    parts.push(`<p>📘 ${esc(t('officialAnswer'))}: <b>${esc(q.answer ? t('true') : t('false'))}</b></p>`);
+    const rel = minRelated(q);
+    if (rel.length) parts.push(`<p class="small">${esc(t('officialRelated'))}</p><ul class="small">${rel.map(r => `<li>${esc(r.q.it)}</li>`).join('')}</ul>`);
+    return parts.join('');
+  }
   if (q.e) parts.push(`<p>${esc(c.pick(q.e))}</p>`);
   if (q.scenario) {
     const scn = scenarioByIndex(q.scenario);
@@ -173,9 +201,10 @@ export function quizRunView(c, mode, arg) {
     return { html: `<a class="back" href="#/quiz">← ${esc(t('quiz'))}</a><div class="empty card"><p>${esc(mode === 'errors' ? t('noErrors') : mode === 'smart' ? t('nothingDue') : '—')}</p><a class="btn btn-primary" href="#/quiz/run/quick">${esc(t('quickQuiz'))}</a></div>` };
   }
   const ex = examConfig(c);
-  const isExam = mode === 'exam';
+  const isExam = isExamMode(mode);
   const chapter = mode === 'chapter' ? c.course.chapters.find(ch => ch.id === arg) : null;
-  const title = isExam ? t('examSim') : chapter ? `${t('chapter')} ${chapter.n}` : { quick: t('quickQuiz'), errors: t('reviewErrors'), tricky: t('tricky'), signs: t('signsQuiz'), smart: t('smartReview') }[mode];
+  const topic = mode === 'mintopic' ? minTopic(arg) : null;
+  const title = isExam ? t('examSim') : topic ? `📘 ${topic.short}` : chapter ? `${t('chapter')} ${chapter.n}` : { quick: t('quickQuiz'), errors: t('reviewErrors'), tricky: t('tricky'), signs: t('signsQuiz'), smart: t('smartReview') }[mode];
   if (isExam && !store.pro) store.countExam();
   run = { mode, arg, title, items, answers: {}, revealed: {}, flags: new Set(), index: 0, started: Date.now(), limit: isExam ? Math.round(ex.minutes * 60 * Math.min(1, items.length / ex.questions)) : null, finished: false };
 
@@ -222,6 +251,7 @@ function drawRunner(c, el) {
   const answeredCount = Object.keys(run.answers).length;
   const left = run.limit ? run.limit - Math.floor((Date.now() - run.started) / 1000) : null;
   const ch = c.course.chapters.find(x => x.id === q.chapterId);
+  const tp = q.official ? minTopic(q.topic) : null;
 
   el.innerHTML = `
   <div class="run-head">
@@ -233,12 +263,13 @@ function drawRunner(c, el) {
     : `<div class="progress-line"><i style="width:${((run.index + 1) / run.items.length) * 100}%"></i></div>`}
   <div class="q-card">
     ${ch ? `<div class="q-chapter">${ch.icon} ${esc(c.pick(ch.title))}</div>` : ''}
+    ${tp ? `<div class="q-chapter">📘 ${esc(tp.short)}${c.lang !== 'it' ? ` · <small>${esc(t('officialItOnly'))}</small>` : ''}</div>` : ''}
     ${media(c, q)}
     <div class="q-text-row"><p class="q-text">${esc(c.pick(q.q))}</p><button class="icon-btn speak" data-speak="q" aria-label="${esc(t('listen'))}">${speakerIcon}</button></div>
     ${optionsHtml(c, q, sel, { reveal: revealed, locked: revealed })}
     ${!isExam && q.format === 'mcq' && q.multi && !revealed ? `<button class="btn btn-primary" data-act="confirm" ${sel?.length ? '' : 'disabled'}>${esc(t('confirm'))}</button>` : ''}
     ${revealed ? `<div class="feedback ${isCorrect(q, sel) ? 'ok' : 'ko'}"><b>${isCorrect(q, sel) ? '✅ ' + esc(t('correctAns')) : '❌ ' + esc(t('wrongAns'))}</b>${explanationHtml(c, q)}</div>` : ''}
-    ${!isExam ? `<button class="btn btn-ghost small hint-btn" data-act="hint">💡 ${esc(t('hint'))}</button>` : ''}
+    ${!isExam && !q.official ? `<button class="btn btn-ghost small hint-btn" data-act="hint">💡 ${esc(t('hint'))}</button>` : ''}
   </div>
   <div class="run-foot">
     <button class="btn btn-ghost" data-act="prev" ${run.index === 0 ? 'disabled' : ''}>← ${esc(t('prev'))}</button>

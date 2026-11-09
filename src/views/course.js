@@ -1,4 +1,4 @@
-import { esc, md, bar, chapterStats, bindSpeak, speakerIcon } from './util.js';
+import { esc, md, bar, chapterStats, bindSpeak, speakerIcon, sourceLine, sourcesCard } from './util.js';
 import { ROAD_SIGNS, signName } from '../signs/catalog.js';
 import { renderSign } from '../signs/draw.js';
 import { hasLang } from '../content/index.js';
@@ -64,6 +64,7 @@ export function chapterView(c, id) {
       </section>`).join('')}
     ${ch.incroci && c.cfg.drive === 'right' ? `<a class="btn btn-secondary" href="#/junctions">✖️ ${esc(t('junctions'))} — ${esc(t('junctionsSub'))}</a>` : ''}
     ${shown.length ? `<section class="lesson-sec"><h2>${esc(t('relatedSigns'))}</h2><div class="sign-strip">${shown.map(s => `<a class="sign-chip" href="#/sign/${s.id}">${renderSign(s.spec, { country: c.country })}<span>${esc(signName(s, c.lang))}</span></a>`).join('')}</div></section>` : ''}
+    ${sourceLine(c, 0)}
     <div class="lesson-actions">
       <a class="btn btn-primary" href="#/quiz/run/chapter/${ch.id}">📝 ${esc(t('startQuiz'))} (${st.total})</a>
       <button class="btn btn-ghost" id="mark-read">${c.p.read[ch.id] ? '✓ ' + esc(t('studied')) : esc(t('markRead'))}</button>
