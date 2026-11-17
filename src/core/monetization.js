@@ -121,15 +121,17 @@ async function waitUntilActive() {
   });
 }
 
-// ATT: chiesto dal codice nativo (SceneDelegate.swift); qui si aspetta al massimo 10 s.
+// ATT: chiesto SOLO qui, dopo il modulo GDPR (UMP), mai prima (App Review 5.1.1(iv)).
+// iOS ignora la richiesta se l'app non è in primo piano: si riprova finché lo stato non è deciso.
 async function requestTrackingPermission() {
   if (platform !== 'ios') return;
   try {
     await waitUntilActive();
-    for (let waited = 0; waited <= 10000; waited += 1000) {
+    await sleep(600);
+    for (let waited = 0; waited <= 12000; waited += 1000) {
       const { status } = await AdMob.trackingAuthorizationStatus();
       if (status !== 'notDetermined') { diag(`ATT: ${status}`); return; }
-      if (waited === 3000) AdMob.requestTrackingAuthorization().catch(() => {});
+      if (waited % 4000 === 0) { await waitUntilActive(); AdMob.requestTrackingAuthorization().catch(() => {}); }
       await sleep(1000);
     }
     diag('ATT: nessuna risposta in 10 s, si prosegue');

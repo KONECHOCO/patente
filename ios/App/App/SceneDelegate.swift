@@ -1,6 +1,5 @@
 import UIKit
 import Capacitor
-import AppTrackingTransparency
 
 class SceneDelegate: UIResponder, UIWindowSceneDelegate {
     var window: UIWindow?
@@ -23,15 +22,7 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         SceneDelegateProxy.shared.scene(scene, continue: userActivity)
     }
 
-    // App Tracking Transparency chiesta dal lato nativo appena la scena è attiva:
-    // iOS mostra il popup solo con l'app in primo piano e ignora le richieste fatte troppo presto.
-    // Il codice web (monetization.js) aspetta la risposta prima di inizializzare AdMob.
-    func sceneDidBecomeActive(_ scene: UIScene) {
-        guard #available(iOS 14, *) else { return }
-        DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
-            guard UIApplication.shared.applicationState == .active,
-                  ATTrackingManager.trackingAuthorizationStatus == .notDetermined else { return }
-            ATTrackingManager.requestTrackingAuthorization { _ in }
-        }
-    }
+    // App Tracking Transparency is NOT requested here: it must come after the GDPR (UMP) consent form,
+    // otherwise users who chose "Ask App Not to Track" are asked again by the GDPR form
+    // (App Review guideline 5.1.1(iv)). monetization.js requests it right after the consent flow.
 }
