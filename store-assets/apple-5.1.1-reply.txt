@@ -1,0 +1,13 @@
+Hello, thank you for the review.
+
+We fixed the order of the consent prompts in build 1.0.0 (4):
+
+1. The GDPR consent form (Google User Messaging Platform) is now shown first, only to users in the EEA, the UK and Switzerland.
+2. The App Tracking Transparency request is shown only after that form has been closed. It is no longer requested by the native code at launch.
+3. If the user selects "Ask App Not to Track", no further tracking request is shown in the same flow, and the ad SDK serves ads without the IDFA.
+
+Outside the EEA/UK/Switzerland the GDPR form is not shown at all: users only see the App Tracking Transparency request. This regional difference is documented in the Review Notes.
+
+Users can change their ad consent at any time from Settings > "Ad consent and privacy".
+
+Thank you.
